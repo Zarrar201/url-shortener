@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>URL Shortener</title>
+  <style>
+
+    body { font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: auto; background-color: antiquewhite; }
+    input, button { padding: 10px; margin-top: 10px; width: 100%; box-sizing: border-box; }
+    ul { list-style: none; padding: 0; }
+    li { margin: 10px 0; }
+    a { color: blue; }
+  </style>
+</head>
+<body>
+  <h1 style="text-align: center;">URL Shortener</h1>
+  <input id="originalUrl" type="url" placeholder="Enter URL to shorten" />
+  <button onclick="shortenUrl()">Shorten</button>
+
+  <script>
+    const apiUrl = 'http://localhost:5000';
+
+    async function shortenUrl() {
+      const originalUrl = document.getElementById('originalUrl').value;
+      if (!originalUrl) return alert('Please enter a URL');
+      const res = await fetch(apiUrl + '/shorten', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ originalUrl })
+      });
+      const data = await res.json();
+      document.getElementById('originalUrl').value = '';
+      loadStats();
+      alert('Short URL: ' + data.shortUrl);
+    }
+
+    async function loadStats() {
+      const res = await fetch(apiUrl + '/stats');
+      const urls = await res.json();
+      const list = document.getElementById('urlList');
+      list.innerHTML = '';
+      urls.forEach(url => {
+        const li = document.createElement('li');
+        li.innerHTML = `<a href="${apiUrl}/${url.shortId}" target="_blank">${apiUrl}/${url.shortId}</a> - Original: ${url.originalUrl} - Clicks: ${url.clicks}`;
+        list.appendChild(li);
+      });
+    }
+    loadStats();
+  </script>
+</body>
+</html>
